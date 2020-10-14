@@ -5,7 +5,9 @@ defmodule ScoopWeb.Router do
     plug :accepts, ["json"]
   end
 
-  scope "/api", ScoopWeb do
+  scope "/", ScoopWeb do
     pipe_through :api
+
+    get "/", MetaController, :index
   end
 end

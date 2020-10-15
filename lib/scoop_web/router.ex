@@ -24,6 +24,8 @@ defmodule ScoopWeb.Router do
     pipe_through :api
 
     get "/", MetaController, :index
+
+    resources "/users", UserController, except: [:new, :edit]
   end
 
   scope "/" do

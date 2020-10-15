@@ -11,7 +11,8 @@ defmodule Scoop.Application do
       # Start the Ecto repository
       Scoop.Repo,
       # Start the endpoint when the application starts
-      ScoopWeb.Endpoint
+      ScoopWeb.Endpoint,
+      {Phoenix.PubSub, name: Scoop.PubSub},
       # Starts a worker by calling: Scoop.Worker.start_link(arg)
       # {Scoop.Worker, arg},
     ]

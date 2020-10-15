@@ -15,7 +15,8 @@ config :scoop, ScoopWeb.Endpoint,
   url: [host: "localhost"],
   secret_key_base: "spuZD/OLDPxyxqVhviifHJ1YhOo3/4yGSzY+VJtMYKROnaddimDBVykV3sOIlE+T",
   render_errors: [view: ScoopWeb.ErrorView, accepts: ~w(json)],
-  pubsub: [name: Scoop.PubSub, adapter: Phoenix.PubSub.PG2]
+  pubsub: [name: Scoop.PubSub, adapter: Phoenix.PubSub.PG2],
+  live_view: [signing_salt: System.get_env("SECRET_SALT", :crypto.strong_rand_bytes(32) |> Base.encode16)]
 
 # Configures Elixir's Logger
 config :logger, :console,

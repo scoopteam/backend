@@ -4,6 +4,7 @@ defmodule ScoopWeb.Router do
   import Phoenix.LiveDashboard.Router
 
   pipeline :api do
+    plug CORSPlug, origin: ["http://dev.seph.club:3000", "https://scoop-frontend.netlify.app"]
     plug :accepts, ["json"]
   end
 

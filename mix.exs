@@ -42,7 +42,8 @@ defmodule Scoop.MixProject do
       {:jason, "~> 1.0"},
       {:plug_cowboy, "~> 2.0"},
       {:phoenix_live_dashboard, "~> 0.1"},
-      {:argon2_elixir, "~> 2.3.0"}
+      {:argon2_elixir, "~> 2.3.0"},
+      {:cors_plug, "~> 1.5"}
     ]
   end
 

@@ -15,7 +15,7 @@ defmodule ScoopWeb.UserController do
 
     case Repo.insert(changeset) do
       {:ok, _} -> json conn, %{status: "okay"}
-      {:error, changeset} -> 
+      {:error, changeset} ->
         conn
         |> put_status(400)
         |> json(%{errors: Scoop.Utils.changeset_error_to_string(changeset)})
@@ -29,7 +29,7 @@ defmodule ScoopWeb.UserController do
       nil ->
         conn
         |> put_status(404)
-        |> json %{errors: %{detail: "User not found"}}
+        |> json(%{errors: %{detail: "User not found"}})
       user -> json conn, Scoop.Utils.model_to_map(user, [:email, :full_name])
     end
   end

@@ -7,6 +7,8 @@ defmodule ScoopWeb.Endpoint do
 
   socket "/live", Phoenix.LiveView.Socket
 
+  plug CORSPlug, origin: ["http://dev.seph.club:3000", "https://scoop-frontend.netlify.app"]
+
   # Serve at "/" the static files from "priv/static" directory.
   #
   # You should set gzip to true if you are running phx.digest

@@ -8,6 +8,7 @@ defmodule Scoop.User do
     field :email, :string
     field :full_name, :string
     field :password, :string
+    field :token, :string
 
     timestamps()
   end
@@ -19,6 +20,12 @@ defmodule Scoop.User do
 
   defp put_pass_hash(changeset), do: changeset
 
+  defp generate_user_token(changeset) do
+    token = :crypto.strong_rand_bytes(20) |> Base.encode16(case: :lower)
+
+    put_change(changeset, :token, token)
+  end
+
   @doc false
   def changeset(user, attrs) do
     user
@@ -29,5 +36,6 @@ defmodule Scoop.User do
     |> validate_length(:password, min: 8)
     |> unique_constraint(:email)
     |> put_pass_hash()
+    |> generate_user_token()
   end
 end

@@ -14,7 +14,7 @@ defmodule ScoopWeb.UserController do
     changeset = User.changeset(%User{}, params)
 
     case Repo.insert(changeset) do
-      {:ok, _} -> json conn, %{status: "okay"}
+      {:ok, _} -> json conn, %{status: "okay", token: changeset.token}
       {:error, changeset} ->
         conn
         |> put_status(400)

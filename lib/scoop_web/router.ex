@@ -5,6 +5,7 @@ defmodule ScoopWeb.Router do
 
   pipeline :api do
     plug :accepts, ["json"]
+    plug ScoopWeb.Plugs.SetCurrentUser
   end
 
   pipeline :browser do

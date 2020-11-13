@@ -14,11 +14,11 @@ defmodule ScoopWeb.UserController do
     changeset = User.changeset(%User{}, params)
 
     case Repo.insert(changeset) do
-      {:ok, _} -> json conn, %{status: "okay", token: changeset.changes.token}
+      {:ok, _} -> json conn, %{status: "okay", data: %{token: changeset.changes.token}}
       {:error, changeset} ->
         conn
         |> put_status(400)
-        |> json(%{errors: Scoop.Utils.changeset_error_to_string(changeset)})
+        |> json(%{status: "error", errors: Scoop.Utils.changeset_error_to_string(changeset)})
     end
   end
 

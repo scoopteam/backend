@@ -11,7 +11,15 @@ defmodule ScoopWeb.UserController do
         |> json(%{status: "error", message: "This endpoint requires authentication"})
       true ->
         conn
-        |> json(%{status: "okay", data: Scoop.Utils.model_to_map(conn.assigns.current_user, [:email, :full_name])})
+        |> json(
+          %{
+            status: "okay",
+            data: Scoop.Utils.model_to_map(
+              conn.assigns.current_user,
+              [:email, :full_name, :id, :inserted_at, :updated_at]
+            )
+          }
+        )
     end
   end
 

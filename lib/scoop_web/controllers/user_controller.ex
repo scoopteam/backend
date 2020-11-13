@@ -4,10 +4,15 @@ defmodule ScoopWeb.UserController do
   alias Scoop.{Repo, User}
 
   def index(conn, _params) do
-    json conn, %{
-      "status" => "okay",
-      "message" => "Index for the user controller"
-    }
+    case conn.assigns.signed_in? do
+      false ->
+        conn
+        |> put_status(401)
+        |> json(%{status: "error", message: "This endpoint requires authentication"})
+      true ->
+        conn
+        |> json(%{status: "okay", data: Scoop.Utils.model_to_map(conn.assigns.current_user, [:email, :full_name])})
+    end
   end
 
   def create(conn, params) do

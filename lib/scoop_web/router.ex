@@ -25,7 +25,7 @@ defmodule ScoopWeb.Router do
 
     get "/", MetaController, :index
 
-    resources "/users", UserController, except: [:new, :edit]
+    resources "/user", UserController, except: [:new, :edit]
   end
 
   scope "/" do

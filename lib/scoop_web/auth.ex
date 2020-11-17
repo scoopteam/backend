@@ -7,13 +7,15 @@ defmodule ScoopWeb.Plugs.SetCurrentUser do
   end
 
   def assign_nil_user(conn) do
-      assign(conn, :current_user, nil)
-      assign(conn, :signed_in?, false)
+    conn
+    |> assign(:current_user, nil)
+    |> assign(:signed_in?, false)
   end
 
   def assign_logged_in_user(conn, user) do
-    assign(conn, :current_user, user)
-    assign(conn, :signed_in?, true)
+    conn
+    |> assign(:current_user, user)
+    |> assign(:signed_in?, true)
   end
 
   def call(conn, _params) do

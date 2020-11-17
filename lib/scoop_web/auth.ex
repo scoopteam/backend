@@ -20,7 +20,7 @@ defmodule ScoopWeb.Plugs.SetCurrentUser do
     token = get_req_header(conn, "authorization")
 
     if (token |> length) > 0 do
-      token = Enum.at(0)
+      token = Enum.at(token, 0)
 
       user = Repo.get_by(User, token: token)
 

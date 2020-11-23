@@ -42,7 +42,7 @@ defmodule ScoopWeb.UserController do
       nil ->
         conn
         |> put_status(401)
-        |> json(%{status: "error", errors: %{email: "does not exist"}})
+        |> json(%{status: "error", errors: %{email: ["does not exist"]}})
 
       user ->
         case Argon2.verify_pass(password, user.password) do
@@ -52,7 +52,7 @@ defmodule ScoopWeb.UserController do
           false ->
             conn
             |> put_status(401)
-            |> json(%{status: "error", errors: %{password: "is incorrect"}})
+            |> json(%{status: "error", errors: %{password: ["is incorrect"]}})
         end
     end
   end

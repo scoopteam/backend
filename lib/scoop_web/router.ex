@@ -17,9 +17,15 @@ defmodule ScoopWeb.Router do
   end
 
   pipeline :admin do
-    plug :basic_auth, username: "admin", password: (if Mix.env() == :prod do System.fetch_env!("ADMIN_PASSWORD") else "password" end)
+    plug :basic_auth,
+      username: "admin",
+      password:
+        (if Mix.env() == :prod do
+           System.fetch_env!("ADMIN_PASSWORD")
+         else
+           "password"
+         end)
   end
-
 
   scope "/", ScoopWeb do
     pipe_through :api
@@ -27,6 +33,7 @@ defmodule ScoopWeb.Router do
     get "/", MetaController, :index
 
     resources "/user", UserController, except: [:new, :edit]
+    post "/user/login", UserController, :login
   end
 
   scope "/" do

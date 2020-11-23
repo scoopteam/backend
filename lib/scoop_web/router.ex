@@ -3,9 +3,14 @@ defmodule ScoopWeb.Router do
   import Plug.BasicAuth
   import Phoenix.LiveDashboard.Router
 
-  pipeline :api do
+  pipeline :public_api do
     plug :accepts, ["json"]
     plug ScoopWeb.Plugs.SetCurrentUser
+  end
+
+  pipeline :private_api do
+    plug :accepts, ["json"]
+    plug ScoopWeb.Plugs.SetCurrentUser, auth_required: true
   end
 
   pipeline :browser do
@@ -21,19 +26,25 @@ defmodule ScoopWeb.Router do
       username: "admin",
       password:
         (if Mix.env() == :prod do
-           System.fetch_env!("ADMIN_PASSWORD")
-         else
-           "password"
-         end)
+          System.fetch_env!("ADMIN_PASSWORD")
+        else
+          "password"
+        end)
   end
 
   scope "/", ScoopWeb do
-    pipe_through :api
+    pipe_through :public_api
 
     get "/", MetaController, :index
 
     resources "/user", UserController, except: [:new, :edit]
     post "/user/login", UserController, :login
+  end
+
+  scope "/", ScoopWeb do
+    pipe_through :private_api
+
+    resources "/org", OrganisationController, except: [:new, :edit]
   end
 
   scope "/" do

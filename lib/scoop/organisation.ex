@@ -18,7 +18,10 @@ defmodule Scoop.Organisation do
   defp generate_code() do
     # Generate a random 6 digit code
     Enum.map(1..6, fn _ ->
-      Enum.random(Enum.to_list(?A..?Z))
+      Enum.random(
+        Enum.to_list(?A..?Z)
+        |> List.delete(?Q)
+      )
     end) |> List.to_string
   end
 

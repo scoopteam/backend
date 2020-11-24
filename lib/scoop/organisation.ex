@@ -7,9 +7,10 @@ defmodule Scoop.Organisation do
   schema "organisations" do
     field :code, :string
     field :name, :string
-    field :owner_id, :id
 
     has_many :memberships, Scoop.OrganisationMembership, foreign_key: :org_id
+
+    belongs_to :owner, Scoop.User
 
     timestamps()
   end

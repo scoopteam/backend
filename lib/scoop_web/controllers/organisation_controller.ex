@@ -28,6 +28,29 @@ defmodule ScoopWeb.OrganisationController do
     json conn, %{status: "okay", data: data}
   end
 
+  def show(conn, %{"id" => id}) do
+    case Repo.get_by(OrganisationMembership, org_id: id, user_id: conn.assigns.current_user.id) do
+      nil ->
+        conn
+        |> put_status(403)
+        |> json(%{status: "error", message: "Membership not found"})
+      om ->
+        om = Repo.preload(om, :org)
+
+        data = %{}
+        |> Map.put(:org, Scoop.Utils.model_to_map(om.org, [:name, :id]))
+        |> Map.put(:permissions, om.permissions)
+
+        data = if Permissions.has_any_perm?(om.permissions, ["admin", "owner"]) do
+          Map.update(data, :org, %{}, fn org -> Map.put(org, :code, om.org.code) end)
+        else
+          data
+        end
+
+        json conn, %{status: "okay", data: data}
+    end
+  end
+
   def join(conn, %{"code" => code}) do
     case Repo.get_by(Organisation, code: code) do
       nil ->

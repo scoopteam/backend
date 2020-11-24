@@ -42,7 +42,10 @@ defmodule ScoopWeb.OrganisationController do
         |> Map.put(:permissions, om.permissions)
 
         data = if Permissions.has_any_perm?(om.permissions, ["admin", "owner"]) do
-          Map.update(data, :org, %{}, fn org -> Map.put(org, :code, om.org.code) end)
+          memberships = om.org |> Repo.preload(:memberships) |> Map.get(:memberships) |> length
+          data
+          |> Map.update(:org, %{}, fn org -> Map.put(org, :code, om.org.code) end)
+          |> Map.update(:org, %{}, fn org -> Map.put(org, :member_count, memberships) end)
         else
           data
         end
@@ -93,6 +96,24 @@ defmodule ScoopWeb.OrganisationController do
         conn
         |> put_status(400)
         |> json(%{status: "error", errors: Scoop.Utils.changeset_error_to_string(changeset)})
+    end
+  end
+
+  def delete(conn, %{"id" => id}) do
+    case Repo.get_by(OrganisationMembership, org_id: id, user_id: conn.assigns.current_user.id) do
+      nil ->
+        conn
+        |> put_status(403)
+        |> json(%{status: "error", message: "Membership not found"})
+      om ->
+        if Permissions.has_perm?(om.permissions, "owner") do
+          om = Repo.preload(om, :org)
+          Repo.delete(om.org)
+        else
+          Repo.delete(om)
+        end
+
+        json conn, %{status: "okay"}
     end
   end
 end

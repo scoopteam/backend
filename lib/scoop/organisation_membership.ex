@@ -16,5 +16,9 @@ defmodule Scoop.OrganisationMembership do
     organisation_membership
     |> cast(attrs, [:permissions, :user_id, :org_id])
     |> validate_required([:permissions, :user_id, :org_id])
+    |> unique_constraint(
+      [:org_id, :user_id],
+      name: :organisation_memberships_org_id_user_id_index,
+      message: "is already used")
   end
 end

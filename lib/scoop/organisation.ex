@@ -9,7 +9,7 @@ defmodule Scoop.Organisation do
     field :name, :string
     field :owner_id, :id
 
-    has_many :memberships, Scoop.OrganisationMembership
+    has_many :memberships, Scoop.OrganisationMembership, foreign_key: :org_id
 
     timestamps()
   end

@@ -45,6 +45,7 @@ defmodule ScoopWeb.Router do
     pipe_through :private_api
 
     resources "/org", OrganisationController, except: [:new, :edit]
+    post "/org/join", OrganisationController, :join
   end
 
   scope "/" do

@@ -28,6 +28,29 @@ defmodule ScoopWeb.OrganisationController do
     json conn, %{status: "okay", data: data}
   end
 
+  def join(conn, %{"code" => code}) do
+    case Repo.get_by(Organisation, code: code) do
+      nil ->
+        conn
+        |> put_status(404)
+        |> json(%{status: "error", errors: %{"code" => ["not found"]}})
+      org ->
+        om = OrganisationMembership.changeset(%OrganisationMembership{}, %{
+          user_id: conn.assigns.current_user.id,
+          org_id: org.id,
+          permissions: []
+        })
+
+        case Repo.insert(om) do
+          {:ok, _} -> json conn, %{status: "okay"}
+          {:error, cs} ->
+            conn
+            |> put_status(404)
+            |> json(%{status: "error", errors: Scoop.Utils.changeset_error_to_string(cs)})
+        end
+    end
+  end
+
   @spec create(Plug.Conn.t(), map) :: Plug.Conn.t()
   def create(conn, params) do
     params = Map.put(params, "owner_id", conn.assigns.current_user.id)

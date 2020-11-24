@@ -45,7 +45,7 @@ defmodule ScoopWeb.OrganisationController do
           {:ok, _} -> json conn, %{status: "okay"}
           {:error, cs} ->
             conn
-            |> put_status(404)
+            |> put_status(400)
             |> json(%{status: "error", errors: Scoop.Utils.changeset_error_to_string(cs)})
         end
     end

@@ -42,7 +42,7 @@ defmodule ScoopWeb.OrganisationController do
           permissions: ["owner"]
         }) |> Repo.insert()
 
-        json(conn, %{status: "okay", data: %{code: changeset.changes.code}})
+        json(conn, %{status: "okay", data: %{id: new_org.id}})
       {:error, changeset} ->
         conn
         |> put_status(400)

@@ -9,6 +9,8 @@ defmodule Scoop.Organisation do
     field :name, :string
     field :owner_id, :id
 
+    has_many :memberships, Scoop.OrganisationMembership
+
     timestamps()
   end
 

@@ -10,6 +10,8 @@ defmodule Scoop.User do
     field :password, :string
     field :token, :string
 
+    has_many :memberships, Scoop.OrganisationMembership
+
     timestamps()
   end
 

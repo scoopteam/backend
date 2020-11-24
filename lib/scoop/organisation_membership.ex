@@ -4,8 +4,9 @@ defmodule Scoop.OrganisationMembership do
 
   schema "organisation_memberships" do
     field :permissions, {:array, :string}
-    field :user_id, :id
-    field :org_id, :id
+
+    belongs_to :org, Scoop.Organisation
+    belongs_to :user, Scoop.User
 
     timestamps()
   end
@@ -13,7 +14,7 @@ defmodule Scoop.OrganisationMembership do
   @doc false
   def changeset(organisation_membership, attrs) do
     organisation_membership
-    |> cast(attrs, [:permissions])
-    |> validate_required([:permissions])
+    |> cast(attrs, [:permissions, :user_id, :org_id])
+    |> validate_required([:permissions, :user_id, :org_id])
   end
 end

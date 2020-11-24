@@ -10,6 +10,8 @@ defmodule Scoop.Organisation do
 
     has_many :memberships, Scoop.OrganisationMembership, foreign_key: :org_id
 
+    has_many :groups, Scoop.Group
+
     belongs_to :owner, Scoop.User
 
     timestamps()

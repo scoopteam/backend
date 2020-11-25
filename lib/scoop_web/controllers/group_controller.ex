@@ -60,9 +60,21 @@ defmodule ScoopWeb.GroupController do
             else
               case Repo.get_by(GroupMembership, organisation_membership_id: om.id, group_id: group_id, user_id: conn.assigns.current_user.id) do
                 nil ->
-                  conn
-                  |> put_status(403)
-                  |> json(%{status: "error", message: "You do not have permission to access this group"})
+                  if not group.public do
+                    conn
+                    |> put_status(403)
+                    |> json(%{status: "error", message: "You do not have permission to access this group"})
+                  else
+                    json conn, %{
+                      status: "okay",
+                      data: Scoop.Utils.model_to_map(group, [
+                        :name,
+                        :public,
+                        :auto_subscribe,
+                        :id
+                      ]) |> Map.merge(%{joined: false})
+                    }
+                  end
                 _ ->
                   json conn, %{
                     status: "okay",

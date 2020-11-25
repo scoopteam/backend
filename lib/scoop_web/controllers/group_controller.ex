@@ -32,6 +32,75 @@ defmodule ScoopWeb.GroupController do
     end
   end
 
+  def update(conn, %{"organisation_id" => org_id, "id" => group_id}) do
+    case Repo.get_by(OrganisationMembership, org_id: org_id, user_id: conn.assigns.current_user.id) do
+      nil ->
+        conn
+        |> put_status(404)
+        |> json(%{status: "error", message: "Organisation membership not found"})
+      om ->
+        case Repo.get_by(Group, organisation_id: org_id, id: group_id) do
+          nil ->
+            json conn, %{status: "error", message: "Group does not exist"}
+          group ->
+            case Repo.get_by(
+              GroupMembership,
+              organisation_membership_id: om.id,
+              group_id: group_id,
+              user_id: conn.assigns.current_user.id
+            ) do
+              nil ->
+                if group.public or Permissions.has_any_perm?(om.permissions, ["admin", "owner"]) do
+                  GroupMembership.changeset(%GroupMembership{}, %{
+                    organisation_membership_id: om.id,
+                    group_id: group_id,
+                    user_id: conn.assigns.current_user.id
+                  }) |> Repo.insert()
+
+                  json conn, %{status: "okay"}
+                else
+                  conn
+                  |> put_status(403)
+                  |> json(%{status: "error", message: "Invite-only group"})
+                end
+            end
+        end
+    end
+  end
+
+  def delete(conn, %{"organisation_id" => org_id, "id" => group_id, "delete" => should_delete?}) do
+    case Repo.get_by(OrganisationMembership, org_id: org_id, user_id: conn.assigns.current_user.id) do
+      nil ->
+        conn
+        |> put_status(404)
+        |> json(%{status: "error", message: "Organisation membership not found"})
+      om ->
+        if should_delete? and Permissions.has_any_perm?(om.permissions, ["admin", "owner"]) do
+          group = Repo.get_by(Group, id: group_id, organisation_id: org_id)
+
+          if group do
+            Repo.delete(group)
+            json conn, %{status: "okay"}
+          else
+            conn
+            |> put_status(404)
+            |> json(%{status: "Group not found (tried delete)"})
+          end
+        else
+          gm = Repo.get_by(GroupMembership, organisation_membership_id: om.id, group_id: group_id, user_id: conn.assigns.current_user.id)
+
+          if gm do
+            Repo.delete(gm)
+            json conn, %{status: "okay"}
+          else
+            conn
+            |> put_status(404)
+            |> json(%{status: "Group not found (tried leave)"})
+          end
+        end
+    end
+end
+
   @spec create(Plug.Conn.t(), map) :: Plug.Conn.t()
   def show(conn, %{"organisation_id" => org_id, "id" => group_id}) do
     case Repo.get_by(OrganisationMembership, org_id: org_id, user_id: conn.assigns.current_user.id) do
@@ -48,6 +117,7 @@ defmodule ScoopWeb.GroupController do
 
           group ->
             if Permissions.has_any_perm?(om.permissions, ["owner", "admin"]) do
+              org_member? = Repo.get_by(GroupMembership, organisation_membership_id: om.id, group_id: group_id, user_id: conn.assigns.current_user.id) != nil
               json conn, %{
                 status: "okay",
                 data: Scoop.Utils.model_to_map(group, [
@@ -55,7 +125,7 @@ defmodule ScoopWeb.GroupController do
                   :public,
                   :auto_subscribe,
                   :id
-                ])
+                ]) |> Map.merge(%{joined: org_member?})
               }
             else
               case Repo.get_by(GroupMembership, organisation_membership_id: om.id, group_id: group_id, user_id: conn.assigns.current_user.id) do
@@ -109,7 +179,10 @@ defmodule ScoopWeb.GroupController do
 
         filtered = if not view_private do
           Enum.filter(data, fn group ->
-            group.public
+            case Repo.get_by(GroupMembership, organisation_membership_id: om.id, group_id: group.id, user_id: conn.assigns.current_user.id) do
+              nil -> group.public
+              _membership -> true
+            end
           end)
         else
           data

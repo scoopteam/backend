@@ -93,6 +93,7 @@ defmodule ScoopWeb.OrganisationController do
 
         json(conn, %{status: "okay", data: %{id: new_org.id}})
       {:error, changeset} ->
+        IO.inspect changeset
         conn
         |> put_status(400)
         |> json(%{status: "error", errors: Scoop.Utils.changeset_error_to_string(changeset)})

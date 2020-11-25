@@ -44,11 +44,11 @@ defmodule ScoopWeb.Router do
   scope "/", ScoopWeb do
     pipe_through :private_api
 
+    post "/org/join", OrganisationController, :join
+
     resources "/org", OrganisationController, except: [:new, :edit] do
       resources "/group", GroupController, except: [:new, :edit]
     end
-
-    post "/org/join", OrganisationController, :join
   end
 
   scope "/" do

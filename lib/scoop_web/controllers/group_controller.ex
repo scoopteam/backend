@@ -45,7 +45,7 @@ defmodule ScoopWeb.GroupController do
         org = om.org |> Repo.preload(:groups)
 
         data = Enum.map(org.groups, fn g ->
-          Scoop.Utils.model_to_map(g, [:name, :public, :auto_subscribe])
+          Scoop.Utils.model_to_map(g, [:name, :public, :auto_subscribe, :id])
         end)
 
         filtered = if not view_private do

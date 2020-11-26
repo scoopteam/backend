@@ -12,7 +12,7 @@ defmodule Scoop.Application do
       Scoop.Repo,
       # Start the endpoint when the application starts
       ScoopWeb.Endpoint,
-      {Phoenix.PubSub, name: Scoop.PubSub},
+      {Phoenix.PubSub, name: Scoop.PubSub}
       # Starts a worker by calling: Scoop.Worker.start_link(arg)
       # {Scoop.Worker, arg},
     ]

@@ -6,6 +6,6 @@ defmodule Scoop.Permissions do
   def has_any_perm?(user_perms, requested_perms) do
     requested_perms
     |> Enum.map(&(&1 in user_perms))
-    |> Enum.any?
+    |> Enum.any?()
   end
 end

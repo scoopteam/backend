@@ -12,6 +12,7 @@ defmodule ScoopWeb.GroupController do
         conn
         |> put_status(404)
         |> json(%{status: "error", message: "Organisation membership not found"})
+
       om ->
         if Permissions.has_any_perm?(om.permissions, ["owner", "admin"]) do
           changeset = Group.changeset(%Group{}, params)
@@ -19,6 +20,7 @@ defmodule ScoopWeb.GroupController do
           case Repo.insert(changeset) do
             {:ok, obj} ->
               json(conn, %{status: "okay", data: %{id: obj.id}})
+
             {:error, cs} ->
               conn
               |> put_status(400)
@@ -38,26 +40,29 @@ defmodule ScoopWeb.GroupController do
         conn
         |> put_status(404)
         |> json(%{status: "error", message: "Organisation membership not found"})
+
       om ->
         case Repo.get_by(Group, organisation_id: org_id, id: group_id) do
           nil ->
-            json conn, %{status: "error", message: "Group does not exist"}
+            json(conn, %{status: "error", message: "Group does not exist"})
+
           group ->
             case Repo.get_by(
-              GroupMembership,
-              organisation_membership_id: om.id,
-              group_id: group_id,
-              user_id: conn.assigns.current_user.id
-            ) do
+                   GroupMembership,
+                   organisation_membership_id: om.id,
+                   group_id: group_id,
+                   user_id: conn.assigns.current_user.id
+                 ) do
               nil ->
                 if group.public or Permissions.has_any_perm?(om.permissions, ["admin", "owner"]) do
                   GroupMembership.changeset(%GroupMembership{}, %{
                     organisation_membership_id: om.id,
                     group_id: group_id,
                     user_id: conn.assigns.current_user.id
-                  }) |> Repo.insert()
+                  })
+                  |> Repo.insert()
 
-                  json conn, %{status: "okay"}
+                  json(conn, %{status: "okay"})
                 else
                   conn
                   |> put_status(403)
@@ -74,24 +79,30 @@ defmodule ScoopWeb.GroupController do
         conn
         |> put_status(404)
         |> json(%{status: "error", message: "Organisation membership not found"})
+
       om ->
         if should_delete? and Permissions.has_any_perm?(om.permissions, ["admin", "owner"]) do
           group = Repo.get_by(Group, id: group_id, organisation_id: org_id)
 
           if group do
             Repo.delete(group)
-            json conn, %{status: "okay"}
+            json(conn, %{status: "okay"})
           else
             conn
             |> put_status(404)
             |> json(%{status: "Group not found (tried delete)"})
           end
         else
-          gm = Repo.get_by(GroupMembership, organisation_membership_id: om.id, group_id: group_id, user_id: conn.assigns.current_user.id)
+          gm =
+            Repo.get_by(GroupMembership,
+              organisation_membership_id: om.id,
+              group_id: group_id,
+              user_id: conn.assigns.current_user.id
+            )
 
           if gm do
             Repo.delete(gm)
-            json conn, %{status: "okay"}
+            json(conn, %{status: "okay"})
           else
             conn
             |> put_status(404)
@@ -99,7 +110,7 @@ defmodule ScoopWeb.GroupController do
           end
         end
     end
-end
+  end
 
   @spec create(Plug.Conn.t(), map) :: Plug.Conn.t()
   def show(conn, %{"organisation_id" => org_id, "id" => group_id}) do
@@ -108,6 +119,7 @@ end
         conn
         |> put_status(404)
         |> json(%{status: "error", message: "Organisation membership not found"})
+
       om ->
         case Repo.get_by(Group, organisation_id: org_id, id: group_id) do
           nil ->
@@ -117,47 +129,66 @@ end
 
           group ->
             if Permissions.has_any_perm?(om.permissions, ["owner", "admin"]) do
-              org_member? = Repo.get_by(GroupMembership, organisation_membership_id: om.id, group_id: group_id, user_id: conn.assigns.current_user.id) != nil
-              json conn, %{
+              org_member? =
+                Repo.get_by(GroupMembership,
+                  organisation_membership_id: om.id,
+                  group_id: group_id,
+                  user_id: conn.assigns.current_user.id
+                ) != nil
+
+              json(conn, %{
                 status: "okay",
-                data: Scoop.Utils.model_to_map(group, [
-                  :name,
-                  :public,
-                  :auto_subscribe,
-                  :id
-                ]) |> Map.merge(%{joined: org_member?})
-              }
+                data:
+                  Scoop.Utils.model_to_map(group, [
+                    :name,
+                    :public,
+                    :auto_subscribe,
+                    :id
+                  ])
+                  |> Map.merge(%{joined: org_member?})
+              })
             else
-              case Repo.get_by(GroupMembership, organisation_membership_id: om.id, group_id: group_id, user_id: conn.assigns.current_user.id) do
+              case Repo.get_by(GroupMembership,
+                     organisation_membership_id: om.id,
+                     group_id: group_id,
+                     user_id: conn.assigns.current_user.id
+                   ) do
                 nil ->
                   if not group.public do
                     conn
                     |> put_status(403)
-                    |> json(%{status: "error", message: "You do not have permission to access this group"})
+                    |> json(%{
+                      status: "error",
+                      message: "You do not have permission to access this group"
+                    })
                   else
-                    json conn, %{
+                    json(conn, %{
                       status: "okay",
-                      data: Scoop.Utils.model_to_map(group, [
+                      data:
+                        Scoop.Utils.model_to_map(group, [
+                          :name,
+                          :public,
+                          :auto_subscribe,
+                          :id
+                        ])
+                        |> Map.merge(%{joined: false})
+                    })
+                  end
+
+                _ ->
+                  json(conn, %{
+                    status: "okay",
+                    data:
+                      Scoop.Utils.model_to_map(group, [
                         :name,
                         :public,
                         :auto_subscribe,
                         :id
-                      ]) |> Map.merge(%{joined: false})
-                    }
-                  end
-                _ ->
-                  json conn, %{
-                    status: "okay",
-                    data: Scoop.Utils.model_to_map(group, [
-                      :name,
-                      :public,
-                      :auto_subscribe,
-                      :id
-                    ])
-                  }
+                      ])
+                  })
               end
             end
-          end
+        end
     end
   end
 
@@ -167,28 +198,35 @@ end
         conn
         |> put_status(404)
         |> json(%{status: "error", message: "Organisation membership not found"})
+
       om ->
         view_private = Permissions.has_any_perm?(om.permissions, ["owner", "admin"])
 
         om = om |> Repo.preload(:org)
         org = om.org |> Repo.preload(:groups)
 
-        data = Enum.map(org.groups, fn g ->
-          Scoop.Utils.model_to_map(g, [:name, :public, :auto_subscribe, :id])
-        end)
-
-        filtered = if not view_private do
-          Enum.filter(data, fn group ->
-            case Repo.get_by(GroupMembership, organisation_membership_id: om.id, group_id: group.id, user_id: conn.assigns.current_user.id) do
-              nil -> group.public
-              _membership -> true
-            end
+        data =
+          Enum.map(org.groups, fn g ->
+            Scoop.Utils.model_to_map(g, [:name, :public, :auto_subscribe, :id])
           end)
-        else
-          data
-        end
 
-        json conn, %{status: "okay", data: filtered}
+        filtered =
+          if not view_private do
+            Enum.filter(data, fn group ->
+              case Repo.get_by(GroupMembership,
+                     organisation_membership_id: om.id,
+                     group_id: group.id,
+                     user_id: conn.assigns.current_user.id
+                   ) do
+                nil -> group.public
+                _membership -> true
+              end
+            end)
+          else
+            data
+          end
+
+        json(conn, %{status: "okay", data: filtered})
     end
   end
 end

@@ -24,7 +24,8 @@ defmodule Scoop.Organisation do
         Enum.to_list(?A..?Z)
         |> List.delete(?Q)
       )
-    end) |> List.to_string
+    end)
+    |> List.to_string()
   end
 
   defp put_unique_code(changeset) do

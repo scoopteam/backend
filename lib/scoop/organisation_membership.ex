@@ -19,6 +19,7 @@ defmodule Scoop.OrganisationMembership do
     |> unique_constraint(
       [:org_id, :user_id],
       name: :organisation_memberships_org_id_user_id_index,
-      message: "is already used")
+      message: "is already used"
+    )
   end
 end

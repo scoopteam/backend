@@ -26,10 +26,10 @@ defmodule ScoopWeb.Router do
       username: "admin",
       password:
         (if Mix.env() == :prod do
-          System.fetch_env!("ADMIN_PASSWORD")
-        else
-          "password"
-        end)
+           System.fetch_env!("ADMIN_PASSWORD")
+         else
+           "password"
+         end)
   end
 
   scope "/", ScoopWeb do

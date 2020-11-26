@@ -9,6 +9,8 @@ defmodule Scoop.Group do
 
     belongs_to :organisation, Scoop.Organisation
 
+    has_many :posts, Scoop.Post
+
     timestamps()
   end
 

@@ -3,7 +3,9 @@ defmodule Scoop.Repo.Migrations.CreateGroupMemberships do
 
   def change do
     create table(:group_memberships) do
-      add :organisation_membership_id, references(:organisation_memberships, on_delete: :delete_all)
+      add :organisation_membership_id,
+          references(:organisation_memberships, on_delete: :delete_all)
+
       add :group_id, references(:groups, on_delete: :delete_all)
       add :user_id, references(:users, on_delete: :delete_all)
 

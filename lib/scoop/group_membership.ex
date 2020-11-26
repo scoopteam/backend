@@ -15,5 +15,10 @@ defmodule Scoop.GroupMembership do
     group_membership
     |> cast(attrs, [:user_id, :group_id, :organisation_membership_id])
     |> validate_required([:user_id, :group_id, :organisation_membership_id])
+    |> unique_constraint(
+      [:group_id, :user_id],
+      name: :group_memberships_group_id_user_id_index,
+      message: "is already a member"
+    )
   end
 end

@@ -45,9 +45,12 @@ defmodule ScoopWeb.Router do
     pipe_through :private_api
 
     post "/org/join", OrganisationController, :join
+    post "/org/:org_id/group/:group_id/bulk_add", GroupController, :bulk_add
 
     resources "/org", OrganisationController, except: [:new, :edit] do
-      resources "/group", GroupController, except: [:new, :edit]
+      resources "/group", GroupController, except: [:new, :edit] do
+        resources "/post", PostController, except: [:new, :edit]
+      end
     end
   end
 

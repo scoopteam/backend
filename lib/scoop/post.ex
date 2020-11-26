@@ -3,7 +3,7 @@ defmodule Scoop.Post do
   import Ecto.Changeset
 
   schema "posts" do
-    field :text, :string
+    field :content, :string
     field :title, :string
 
     belongs_to :author, Scoop.User
@@ -15,7 +15,7 @@ defmodule Scoop.Post do
   @doc false
   def changeset(post, attrs) do
     post
-    |> cast(attrs, [:title, :text, :author_id, :group_id])
-    |> validate_required([:title, :text, :author_id, :group_id])
+    |> cast(attrs, [:title, :content, :author_id, :group_id])
+    |> validate_required([:title, :content, :author_id, :group_id])
   end
 end

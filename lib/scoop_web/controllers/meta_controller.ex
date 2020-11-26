@@ -4,7 +4,7 @@ defmodule ScoopWeb.MetaController do
   def index(conn, _params) do
     json(conn, %{
       "status" => "okay",
-      "message" => "Hello!"
+      "message" => "Hello from Scoop!"
     })
   end
 end

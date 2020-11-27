@@ -38,6 +38,8 @@ defmodule Scoop.User do
     user
     |> cast(attrs, [:email, :password, :full_name])
     |> validate_required([:email, :password, :full_name])
+    |> validate_length(:email, max: 100)
+    |> validate_length(:password, min: 8, max: 100)
     |> validate_change(:password, fn :password, password ->
       has_number = Enum.map(?0..?9, fn c ->
         c in String.to_charlist(password)
@@ -53,7 +55,6 @@ defmodule Scoop.User do
     |> validate_format(:email, ~r/^[\w.!#$%&’*+\-\/=?\^`{|}~]+@[a-zA-Z0-9-]+(\.[a-zA-Z0-9-]+)*$/i,
       message: "must be a valid email"
     )
-    |> validate_length(:password, min: 8)
     |> unique_constraint(:email)
     |> put_pass_hash()
     |> generate_user_token()

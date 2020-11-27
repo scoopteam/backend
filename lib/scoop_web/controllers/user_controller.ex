@@ -23,6 +23,21 @@ defmodule ScoopWeb.UserController do
     end
   end
 
+  def feed(conn, _params) do
+    user = conn.assigns.current_user |> Repo.preload([groups: [group: [posts: [:author]]]])
+
+    posts = Enum.reduce(user.groups, [], fn group_membership, acc ->
+      acc ++ group_membership.group.posts
+    end)
+
+    data = Enum.map(posts, fn post ->
+      Scoop.Utils.model_to_map(post, [:content, :id, :title, :inserted_at])
+      |> Map.put(:author, Scoop.Utils.model_to_map(post.author, [:full_name]))
+    end)
+
+    json conn, %{status: "okay", data: data}
+  end
+
   def create(conn, params) do
     changeset = User.changeset(%User{}, params)
 

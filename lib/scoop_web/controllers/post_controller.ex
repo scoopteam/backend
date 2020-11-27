@@ -30,7 +30,7 @@ defmodule ScoopWeb.PostController do
         |> json(%{status: "error", message: "Not a group member"})
       membership ->
         if Permissions.has_any_perm?(membership.permissions, ["admin", "owner"]) do
-          params = params |> Map.merge(%{author_id: conn.assigns.current_user.id})
+          params = params |> Map.merge(%{"author_id" => conn.assigns.current_user.id})
           cs = Post.changeset(%Post{}, params)
 
           case Repo.insert(cs) do

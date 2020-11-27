@@ -33,25 +33,27 @@ defmodule ScoopWeb.Router do
   end
 
   scope "/", ScoopWeb do
-    pipe_through :public_api
-
-    get "/", MetaController, :index
-
-    resources "/user", UserController, except: [:new, :edit]
-    post "/user/login", UserController, :login
-  end
-
-  scope "/", ScoopWeb do
     pipe_through :private_api
 
     post "/org/join", OrganisationController, :join
     post "/org/:org_id/group/:group_id/bulk_add", GroupController, :bulk_add
+
+    get "/user/feed", UserController, :feed
 
     resources "/org", OrganisationController, except: [:new, :edit] do
       resources "/group", GroupController, except: [:new, :edit] do
         resources "/post", PostController, except: [:new, :edit]
       end
     end
+  end
+
+  scope "/", ScoopWeb do
+    pipe_through :public_api
+
+    get "/", MetaController, :index
+
+    resources "/user", UserController, except: [:new, :edit]
+    post "/user/login", UserController, :login
   end
 
   scope "/" do

@@ -11,6 +11,7 @@ defmodule Scoop.User do
     field :token, :string
 
     has_many :memberships, Scoop.OrganisationMembership
+    has_many :groups, Scoop.GroupMembership
 
     timestamps()
   end

@@ -24,7 +24,7 @@ defmodule ScoopWeb.UserController do
   end
 
   def feed(conn, _params) do
-    user = conn.assigns.current_user |> Repo.preload([groups: [group: [posts: [:author, :group]]]])
+    user = conn.assigns.current_user |> Repo.preload([groups: [group: [posts: [:author, group: [:organisation]]]]])
 
     posts = Enum.reduce(user.groups, [], fn group_membership, acc ->
       acc ++ group_membership.group.posts
@@ -33,8 +33,10 @@ defmodule ScoopWeb.UserController do
     data = Enum.map(posts, fn post ->
       Scoop.Utils.model_to_map(post, [:content, :id, :title, :inserted_at])
       |> Map.put(:author, Scoop.Utils.model_to_map(post.author, [:full_name]))
-      |> Map.put(:group, Scoop.Utils.model_to_map(post.group, [:name]))
+      |> Map.put(:group, Scoop.Utils.model_to_map(post.group, [:name]) |> Map.put(:organisation, Scoop.Utils.model_to_map(post.group.organisation, [:name])))
     end)
+
+    data = Enum.sort(data, fn a, b -> a.inserted_at > b.inserted_at end)
 
     json conn, %{status: "okay", data: data}
   end

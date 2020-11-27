@@ -16,6 +16,7 @@ defmodule Scoop.Post do
   def changeset(post, attrs) do
     post
     |> cast(attrs, [:title, :content, :author_id, :group_id])
+    |> validate_length(:content, max: 2000)
     |> validate_required([:title, :content, :author_id, :group_id])
   end
 end

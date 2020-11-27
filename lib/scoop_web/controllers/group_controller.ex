@@ -27,6 +27,12 @@ defmodule ScoopWeb.GroupController do
           # Try to insesrt the group
           case Repo.insert(changeset) do
             {:ok, obj} ->
+              # Automatically add the user to the group
+              GroupMembership.changeset(%GroupMembership{}, %{
+                organisation_membership_id: om.id,
+                group_id: obj.id,
+                user_id: conn.assigns.current_user.id
+              }) |> Repo.insert
               # Success, return the new details
               json(conn, %{status: "okay", data: %{id: obj.id}})
 

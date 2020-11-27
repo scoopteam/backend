@@ -3,7 +3,7 @@ defmodule ScoopWeb.OrganisationController do
 
   import Ecto.Query
 
-  alias Scoop.{Organisation, Repo, OrganisationMembership, Permissions}
+  alias Scoop.{Organisation, Repo, OrganisationMembership, Permissions, Group, GroupMembership}
 
   @spec index(Plug.Conn.t(), any) :: Plug.Conn.t()
   def index(conn, _params) do
@@ -77,7 +77,22 @@ defmodule ScoopWeb.OrganisationController do
           })
 
         case Repo.insert(om) do
-          {:ok, _} ->
+          {:ok, new_om} ->
+            to_join_query = from group in Group,
+              select: group,
+              where: group.auto_subscribe == true and group.organisation_id == ^org.id
+
+            to_join = Repo.all(to_join_query)
+
+            Enum.map(to_join, fn to_join_group ->
+              GroupMembership.changeset(%GroupMembership{}, %{
+                organisation_membership_id: new_om.id,
+                group_id: to_join_group.id,
+                user_id: conn.assigns.current_user.id
+              })
+              |> Repo.insert()
+            end)
+
             json(conn, %{status: "okay"})
 
           {:error, cs} ->

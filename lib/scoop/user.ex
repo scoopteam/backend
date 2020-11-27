@@ -38,7 +38,18 @@ defmodule Scoop.User do
     user
     |> cast(attrs, [:email, :password, :full_name])
     |> validate_required([:email, :password, :full_name])
-    |> validate_format(:password, ~r/.+\d.+/, message: "must include a number")
+    |> validate_change(:password, fn :password, password ->
+      has_number = Enum.map(?0..?9, fn c ->
+        c in String.to_charlist(password)
+      end)
+      |> Enum.any?
+
+      if not has_number do
+        [password: "must contain a number"]
+      else
+        []
+      end
+    end)
     |> validate_format(:email, ~r/^[\w.!#$%&’*+\-\/=?\^`{|}~]+@[a-zA-Z0-9-]+(\.[a-zA-Z0-9-]+)*$/i,
       message: "must be a valid email"
     )

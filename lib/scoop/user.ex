@@ -17,14 +17,19 @@ defmodule Scoop.User do
   end
 
   defp put_pass_hash(%Ecto.Changeset{valid?: true, changes: %{password: password}} = changeset) do
+    # Hash the provided password and update the changeset
     change(changeset, add_hash(password, hash_key: :password))
   end
 
+  # If the changeset is invalid don't attempt to hash the paassword
   defp put_pass_hash(changeset), do: changeset
 
+  # Generate a random user token for API access.
   defp generate_user_token(changeset) do
+    # Generate 20 random bytes and encode them into hex
     token = :crypto.strong_rand_bytes(20) |> Base.encode16(case: :lower)
 
+    # Add the change to the changeset
     put_change(changeset, :token, token)
   end
 

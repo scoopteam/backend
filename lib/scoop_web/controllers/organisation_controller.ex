@@ -59,8 +59,8 @@ defmodule ScoopWeb.OrganisationController do
           |> Map.put(:org, Scoop.Utils.model_to_map(om.org, [:name, :id]))
           |> Map.put(:permissions, om.permissions)
 
+        # If the user is an admin, return details on the number of members and the code
         data =
-          # If the user is an admin, return details on the number of members and the code
           if Permissions.has_any_perm?(om.permissions, ["admin", "owner"]) do
             memberships = om.org |> Repo.preload(:memberships) |> Map.get(:memberships) |> length
 
@@ -100,10 +100,11 @@ defmodule ScoopWeb.OrganisationController do
         case Repo.insert(om) do
           {:ok, new_om} ->
             # Start processing the groups that should be automatically joined.
-            to_join_query = from group in Group,
-              select: group,
-              # Fetch the groups that have auto_subscribe enabled in the current organisation
-              where: group.auto_subscribe == true and group.organisation_id == ^org.id
+            to_join_query =
+              from group in Group,
+                select: group,
+                # Fetch the groups that have auto_subscribe enabled in the current organisation
+                where: group.auto_subscribe == true and group.organisation_id == ^org.id
 
             to_join = Repo.all(to_join_query)
 

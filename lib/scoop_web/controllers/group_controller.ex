@@ -49,7 +49,6 @@ defmodule ScoopWeb.GroupController do
   Add the logged in user to a group
   """
   def update(conn, %{"organisation_id" => org_id, "id" => group_id}) do
-
     # Check the user is a member of the organisation
     case Repo.get_by(OrganisationMembership, org_id: org_id, user_id: conn.assigns.current_user.id) do
       nil ->
@@ -139,7 +138,9 @@ defmodule ScoopWeb.GroupController do
                       # Insert the new group membership
                       case Repo.insert(cs) do
                         # If the user succeeded add them to the added list
-                        {:ok, _} -> {added ++ [user], failed}
+                        {:ok, _} ->
+                          {added ++ [user], failed}
+
                         # If there was an error do more processing
                         {:error, cs} ->
                           # User is already a member
@@ -147,7 +148,7 @@ defmodule ScoopWeb.GroupController do
                             {added ++ [user], failed}
                           else
                             # An error which was not an existing membership occurred.
-                           {added, failed ++ [user]}
+                            {added, failed ++ [user]}
                           end
                       end
                   end
@@ -334,8 +335,8 @@ defmodule ScoopWeb.GroupController do
           end)
 
         # Filter the groups
+        # If user cannot view private groups, filter
         filtered =
-          # If user cannot view private groups, filter
           if not view_private do
             Enum.filter(data, fn group ->
               # If the user is a member of the group, return it.

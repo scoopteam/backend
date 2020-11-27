@@ -13,18 +13,20 @@ defmodule ScoopWeb.PostController do
         conn
         |> put_status(403)
         |> json(%{status: "error", message: "Not a group member"})
+
       membership ->
         # Preload the posts with the auhtor object
         membership = membership |> Repo.preload(group: [posts: [:author]])
 
         # Create a map to return with the post and author name
-        data = Enum.map(membership.group.posts, fn post ->
-          Scoop.Utils.model_to_map(post, [:id, :title, :content])
-          |> Map.put(:author, Scoop.Utils.model_to_map(post.author, [:full_name]))
-        end)
+        data =
+          Enum.map(membership.group.posts, fn post ->
+            Scoop.Utils.model_to_map(post, [:id, :title, :content])
+            |> Map.put(:author, Scoop.Utils.model_to_map(post.author, [:full_name]))
+          end)
 
         # Return the list of posts
-        json conn, %{status: "okay", data: data}
+        json(conn, %{status: "okay", data: data})
     end
   end
 
@@ -39,6 +41,7 @@ defmodule ScoopWeb.PostController do
         conn
         |> put_status(403)
         |> json(%{status: "error", message: "Not a group member"})
+
       membership ->
         # Check the user has admin or owner permissions
         if Permissions.has_any_perm?(membership.permissions, ["admin", "owner"]) do
@@ -50,7 +53,9 @@ defmodule ScoopWeb.PostController do
 
           # Insert the new post
           case Repo.insert(cs) do
-            {:ok, _} -> json(conn, %{status: "okay"})
+            {:ok, _} ->
+              json(conn, %{status: "okay"})
+
             {:error, cs} ->
               # Return the erroring fields
               conn

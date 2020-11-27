@@ -33,26 +33,34 @@ defmodule ScoopWeb.UserController do
   """
   def feed(conn, _params) do
     # Preload all user groups and posts
-    user = conn.assigns.current_user |> Repo.preload([groups: [group: [posts: [:author, group: [:organisation]]]]])
+    user =
+      conn.assigns.current_user
+      |> Repo.preload(groups: [group: [posts: [:author, group: [:organisation]]]])
 
     # Accumulate the posts into a single list
-    posts = Enum.reduce(user.groups, [], fn group_membership, acc ->
-      acc ++ group_membership.group.posts
-    end)
+    posts =
+      Enum.reduce(user.groups, [], fn group_membership, acc ->
+        acc ++ group_membership.group.posts
+      end)
 
     # Convert the posts into serializable map
-    data = Enum.map(posts, fn post ->
-      # Convert the post, author and group into a JSON object
-      Scoop.Utils.model_to_map(post, [:content, :id, :title, :inserted_at])
-      |> Map.put(:author, Scoop.Utils.model_to_map(post.author, [:full_name]))
-      |> Map.put(:group, Scoop.Utils.model_to_map(post.group, [:name]) |> Map.put(:organisation, Scoop.Utils.model_to_map(post.group.organisation, [:name])))
-    end)
+    data =
+      Enum.map(posts, fn post ->
+        # Convert the post, author and group into a JSON object
+        Scoop.Utils.model_to_map(post, [:content, :id, :title, :inserted_at])
+        |> Map.put(:author, Scoop.Utils.model_to_map(post.author, [:full_name]))
+        |> Map.put(
+          :group,
+          Scoop.Utils.model_to_map(post.group, [:name])
+          |> Map.put(:organisation, Scoop.Utils.model_to_map(post.group.organisation, [:name]))
+        )
+      end)
 
     # Sort the posts by the inserted date
     data = Enum.sort(data, fn a, b -> a.inserted_at > b.inserted_at end)
 
     # Return the posts
-    json conn, %{status: "okay", data: data}
+    json(conn, %{status: "okay", data: data})
   end
 
   @doc """
